@@ -193,8 +193,10 @@ define oradb::installdb(
       group       => $group_install,
       cwd         => $oracleBase,
       logoutput   => true,
-      require     => [Oradb::Utils::Dborainst["database orainst ${version}"],
-                      File["${downloadDir}/db_install_${version}.rsp"]],
+      require     => [
+        Oradb::Utils::Dborainst["database orainst ${version}"],
+        File[$rsp_file_path]
+      ],
     }
 
     if ( $bashProfile == true ) {
