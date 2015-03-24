@@ -29,6 +29,7 @@ define oradb::installdb(
   $cluster_nodes           = undef,
   $cleanup_installfiles    = true,
   $installer_location      = undef,
+  $rsp_location            = undef,
 )
 {
   if ( $createUser == true ){
@@ -163,15 +164,19 @@ define oradb::installdb(
       os_group          => $group_install,
     }
 
-    if ! defined(File["${downloadDir}/db_install_${version}.rsp"]) {
-      file { "${downloadDir}/db_install_${version}.rsp":
+    $rsp_file_path = pick($rsp_location, "${downloadDir}/db_install_${version}.rsp")
+
+    if ! defined(File[$rsp_file_path]) {
+      file { $rsp_file_path:
         ensure  => present,
-        content => template("oradb/db_install_${version}.rsp.erb"),
         mode    => '0775',
         owner   => $user,
         group   => $group,
-        require => [Oradb::Utils::Dborainst["database orainst ${version}"],
-                    Db_directory_structure["oracle structure ${version}"],],
+        content => template("oradb/db_install_${version}.rsp.erb"),
+        require => [
+          Oradb::Utils::Dborainst["database orainst ${version}"],
+          Db_directory_structure["oracle structure ${version}"],
+        ],
       }
     }
 
