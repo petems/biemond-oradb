@@ -28,6 +28,7 @@ define oradb::installdb(
   $remoteFile              = true,
   $cluster_nodes           = undef,
   $cleanup_installfiles    = true,
+  $installer_location      = undef,
 )
 {
   if ( $createUser == true ){
@@ -174,8 +175,10 @@ define oradb::installdb(
       }
     }
 
+    $installer_path = pick($installer_location, "${downloadDir}/${file}/database")
+
     exec { "install oracle database ${title}":
-      command     => "/bin/sh -c 'unset DISPLAY;${downloadDir}/${file}/database/runInstaller -silent -waitforcompletion -ignoreSysPrereqs -ignorePrereq -responseFile ${downloadDir}/db_install_${version}.rsp'",
+      command     => "/bin/sh -c 'unset DISPLAY;${installer_path}/runInstaller -silent -waitforcompletion -ignoreSysPrereqs -ignorePrereq -responseFile ${rsp_file_path}'",
       creates     => "${oracleHome}/dbs",
       environment => ["USER=${user}","LOGNAME=${user}"],
       timeout     => 0,
